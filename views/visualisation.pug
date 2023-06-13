@@ -1,7 +1,20 @@
 html
   head
+    link(rel='stylesheet', href='/visualisation/visualisation.css')
+
+
     title= title
-    script(type='module', src='/visualisation/visualisation.js')
+    script(src="https://d3js.org/d3.v7.min.js")
+
   body
     h1 Hello, welcome to the homepage!
     div.graph
+
+    #root
+
+    // Scripts the app needs
+    //script(type="text/javascript", src="../public/lib/d3.js")
+
+    script(type='module', src='../visualisation/visualisation.js')
+
+

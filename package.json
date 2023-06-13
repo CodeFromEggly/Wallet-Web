@@ -10,6 +10,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "d3": "^7.8.5",
+    "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "node-fetch": "^2.6.11",
     "pug": "^3.0.2"

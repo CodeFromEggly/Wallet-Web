@@ -9,10 +9,7 @@ app.set('view engine', 'pug');
 app.set('views', path.join(__dirname, '../views'));
 
 // Set the static files directory
-app.use('/visualisation', express.static(path.join(__dirname, '../visualisation')));
-
-// API key is stored in root folder
-app.use(express.static(path.join(__dirname, '..')));
+app.use(express.static(path.join(__dirname, '../public')));
 
 
 // Define a route to render the homepage
