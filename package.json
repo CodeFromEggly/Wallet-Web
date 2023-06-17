@@ -1,17 +1,16 @@
 {
-  "name": "node-test",
-  "version": "1.0.0",
-  "description": "",
+  "name": "wallet-web",
+  "version": "1.2.0",
+  "description": "Enter an Ethereum wallet to see its transactions. Add a depth query to see how deep the mystery goes.",
   "main": "index.js",
   "scripts": {
     "start": "node server/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Eggly",
   "license": "ISC",
   "dependencies": {
     "d3": "^7.8.5",
-    "dotenv": "^16.1.4",
     "express": "^4.18.2",
     "node-fetch": "^2.6.11",
     "pug": "^3.0.2"

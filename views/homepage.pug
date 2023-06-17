@@ -1,0 +1,19 @@
+html
+  head
+    link(rel='stylesheet', href='/visualisation/visualisation.css')
+
+
+    title= title
+
+  body
+    h1 Test-Web!
+    p Enter Etherscan API and source wallet below:
+    form(action="/submit", method="post")
+      label(for="etherscan-api") Etherscan API
+      input#etherscan-api(type="text" name="etherscanApi")
+      label(for="source-wallet") Source Wallet
+      input#source-wallet(type="text" name="sourceWallet")
+      button(type="submit") Submit
+
+
+

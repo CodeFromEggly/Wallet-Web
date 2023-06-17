@@ -1,19 +1,21 @@
 html
   head
-    link(rel='stylesheet', href='/visualisation/visualisation.css')
+    link(rel='stylesheet', href='../visualisation/visualisation.css')
 
 
     title= title
     script(src="https://d3js.org/d3.v7.min.js")
 
   body
-    h1 Hello, welcome to the homepage!
-    div.graph
+    h1 Results:
+    
+    // Display graph in 'root' div
+    #root 
 
-    #root
+    // Express passes the object 'data'. Handle it here in a way to avoid XSS attacks
+    script.
+      var data = !{JSON.stringify(data).replace(/</g, "\\u003c")};
 
-    // Scripts the app needs
-    //script(type="text/javascript", src="../public/lib/d3.js")
 
     script(type='module', src='../visualisation/visualisation.js')
 
