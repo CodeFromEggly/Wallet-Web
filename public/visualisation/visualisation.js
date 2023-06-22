@@ -5,14 +5,13 @@ Unpack data
 */
 
 const SOURCE = data.sourceWallet;
+console.log("The source wallet is,", SOURCE);
 var nodes = data.nodes;
 var links = data.links;
 var wallets = data.wallets;
 
 console.log(nodes);
 console.log(links);
-
-
 
 /*
 Visualising the results
@@ -22,6 +21,12 @@ Visualising the results
 const height = window.innerHeight * 0.75;
 const width = window.innerWidth * 0.75;
 const nodeRadius = 5;
+
+// Function to input a link's transaction value and return the link's colour
+import { linkColour } from './linkColour.js';
+// Input node's info and source to get its colour
+import { nodeColour } from './nodeColour.js';
+
 
 // force-directed graph layout
 const force = d3.forceSimulation(nodes) // nodes repel each other
@@ -42,13 +47,14 @@ const link =  svg.selectAll(".link")
   .data(links)
   .join("line")
   //.attr("class", "link")
-  .attr("stroke", "#f80a0a");
+  .attr("stroke", d => linkColour(d.value, links));
 
 const node = svg.selectAll(".node")
   .data(nodes)
   .join("circle")
   //.attr("class", "node")
-  .attr("stroke","#f80a0a")
+  .attr("stroke","#ffffff")
+  .style("fill", d => nodeColour(d, SOURCE))
   .attr("r", nodeRadius);
 
 force.on("tick", function () {
@@ -61,6 +67,10 @@ force.on("tick", function () {
     node
     // Create a bounding box to contain the nodes within a nodeRadius margin of the SVG
     .attr("cx", function(d) { return d.x = Math.max(nodeRadius, Math.min(width - nodeRadius, d.x)); })
-    .attr("cy", function(d) { return d.y = Math.max(nodeRadius, Math.min(height - nodeRadius, d.y)); });
+    .attr("cy", function(d) { return d.y = Math.max(nodeRadius, Math.min(height - nodeRadius, d.y)); })
+    .append("title") // Add a tooltip with the node's label
+    .text(d => d.id);
 
 });
+
+
