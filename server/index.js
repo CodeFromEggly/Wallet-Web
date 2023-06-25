@@ -94,8 +94,6 @@ const processData = (data) => {
   
   
   // Generate nodes for the graph from each wallet
-  // TODO arrow notation using 'for each'
-
   var nodes = [];
   wallets.forEach(wallet => {
       var nodeObject = {
@@ -107,8 +105,9 @@ const processData = (data) => {
   // create links for d3 which required numerical IDs not names
   var links = data.result.map(val => {
     let link = {
-      source: wallets.indexOf(val.from),
-      target: wallets.indexOf(val.to),
+      // D3 wants list indices as source and target. These are calculated in linksPostProcess()
+      source: val.from,
+      target: val.to,
       value: val.value
      };
      return link;
@@ -124,7 +123,6 @@ const getAndProcessData = async (params) => {
   const data = await getEtherscanData(params);
   return processData(data);
 };
-
 
 
 
@@ -180,6 +178,9 @@ const layeredSearch = async (params) => {
 
       // Search data on this new wallet
       let new_data = await getAndProcessData(params);
+      // TODO during processing, link to and from value is linked to the indice of the wallet as it was within tbe function
+      // TODO ... this means it doesn't fit the index as it stands in the all object.
+      // TODO mayve change val.to to being just the address in processDAta(). post process the links to match the updated indicies
       
       // Merge data into the current layer of of results (checking for duplicate data)
       duplicateCheck(all, new_data);
@@ -194,10 +195,29 @@ const layeredSearch = async (params) => {
     prev_layer = _.cloneDeep(curr_layer);
     layer += 1;
   }
+  console.log("layer == depth");
+  // TODO Convert link .source and .target to indices of the address in all.wallets
+  linksPostProcess(all);
 
+  // Remove any Wallets that have source '', links that connect, or nodes generated from it
+  console.log("wallets, how many have ''?", all.wallets);
+
+  /* remove blanks
+  */ // TODO clean this up and do at a more efficient point in the whole process
+  let noBlanks = {
+    wallets: all.wallets.filter(wallet => wallet !== ''),
+    nodes: all.nodes.filter(node => node.id !== ''),
+    links: all.links.filter(link => !(link.source == '' || link.target == '')),
+    }
+  // 
+
+  
 
   // Return all the layer which has been gathered
-  return all;
+  console.log("no blanks",noBlanks);
+  console.log("number of wallets, nodes, link",noBlanks.wallets.length,noBlanks.nodes.length,noBlanks.links.length);
+
+  return noBlanks;
 };
 
 
@@ -207,4 +227,15 @@ function duplicateCheck(all, new_data) {
             return !_.find(all[key], (existingItem) => _.isEqual(existingItem, item));
         });
     });
+}
+
+
+// Replace the target and source addresses with the location of said address in wallets list
+function linksPostProcess(all) {
+  console.log("post processing links");
+  for (link of all.links) {
+    //
+    link.target = all.wallets.indexOf(link.target);
+    link.source = all.wallets.indexOf(link.source);
+  }
 }
