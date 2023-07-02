@@ -8,6 +8,17 @@ export const nodeColour = function(node, sourceWallet) {
         return "#f32212";
     }
     else {
-        return "#000000";
+        return "#FFFFFF";
     }
+}
+
+// Size a node dependent on its depth
+export const nodeSize = function(node) { // TODO implement this
+    return 20 / node.depth;
+
+}
+
+// Display a textbox with info when clicked
+export const nodeClick = function(event, d) {
+    // TODO
 }

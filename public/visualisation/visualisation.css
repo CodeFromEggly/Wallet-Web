@@ -1,7 +1,3 @@
-.node {
-    stroke-width: 1.5px;
-}
-
-.link {
-    stroke-opacity: 0.6;
+#root {
+    background-color: black;
 }
