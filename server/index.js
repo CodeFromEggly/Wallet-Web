@@ -39,23 +39,23 @@ Routes
 
 // Route to handle form submission
 app.post('/submit', async (req, res) => {
-    const params = req.body;
-    const SOURCE = params.sourceWallet;
-    console.log("original params",params);
-    params.sourceWallet = params.sourceWallet.toLowerCase();
-    //const processedData = await getAndProcessData(params);
-    // Retreive search data, continuing until depth is met
-    const allData = await layeredSearch(params);
+  const params = req.body;
+  const SOURCE = params.sourceWallet;
+  console.log("original params",params);
+  params.sourceWallet = params.sourceWallet.toLowerCase();
+  //const processedData = await getAndProcessData(params);
 
-    // Process allData into nodes and links (and wallets, still, to see if it differs to the allData.wallets from layeredSearch)
-    let processedData = processData(allData.raw);
-    //console.log("processed data", processedData);
+  // GET search data, until depth is met
+  const allData = await layeredSearch(params);
 
+  // Process allData into nodes and links (and wallets, still, to see if it differs to the allData.wallets from layeredSearch)
+  let processedData = processData(allData.raw);
 
-    // Add sourceWallet for later:
-    processedData.sourceWallet = SOURCE; // TODO may not be necessary as allData.wallets[0] is source
-    res.render('visualisation', {title: 'Visualisation', data: processedData});
-  });
+  // Add sourceWallet for later:
+  processedData.sourceWallet = SOURCE; // TODO may not be necessary as allData.wallets[0] is source
+  
+  res.render('visualisation', {title: 'Visualisation', data: processedData});
+});
 
 
 app.listen(3000, () => {
@@ -64,27 +64,23 @@ app.listen(3000, () => {
 
 
 /* 
-Functions
+Functions // TODO tidy these up, move to other files
 */
 
 
-
-
-// TODO remove the .result from processing data
+// Process data into Nodes and Links
 const processData = (data) => {
-  // Process data into Nodes and Links
 
   // Accumulate list of addresses that transacted
-  var wallets = data.reduce(function (acc, val) {
-      if (acc.indexOf(val.to) === -1) {
-        acc.push(val.to);
-      }
-      if (acc.indexOf(val.from) === -1) {
-        acc.push(val.from);
-      }
-      return acc;
-      }, []);
-  
+  var wallets = data.reduce((acc, val) => {
+    if (!acc.includes(val.to)){
+      acc.push(val.to);
+    }
+    if (!acc.includes(val.from)) {
+      acc.push(val.from);
+    }
+    return acc;
+    }, []);
   
   // Generate nodes for the graph from each wallet
   var nodes = [];
@@ -92,19 +88,20 @@ const processData = (data) => {
     var nodeObject = {
       id: wallet,
     };
-    // Find the original data object where this wallet is a source
+    // To find the original data object where this wallet is a source:
     //let originalObject = data.find((item) => item.from === wallet);
     
     nodes.push(nodeObject);
   });
 
   // create links for d3 which required numerical IDs not names
-  var links = data.map(val => {
+  var links = data.map((val) => {
     let link = {
       // D3 wants list indices as source and target. These are calculated in linksPostProcess()
       source: wallets.indexOf(val.from),
       target: wallets.indexOf(val.to),
-      value: val.value
+      value: (val.value / 10e18), // TODO Convert Wei to ETH here
+      hash: val.hash
      };
      return link;
   });

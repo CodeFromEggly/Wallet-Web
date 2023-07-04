@@ -95,13 +95,16 @@ export const layeredSearch = async (params) => {
     // From this raw data, find the wallets to use for enxt layer
     curr_layer.new_wallets = (generateWallets(curr_layer.raw));
     
-    console.log("curr_layer.data, after for loop, before filter", curr_layer.raw.length); // TODO filter raw data
+    console.log("curr_layer.data, after for loop, before filter", curr_layer.raw.length); 
+
+
     // If one of the new wallets has already been checked, exclude it
     curr_layer.new_wallets = curr_layer.new_wallets.filter(function (wallet) {
         return !(excludes.includes(wallet));
     });
     // Add raw data to all
-    all.raw = all.raw.concat(_.cloneDeep(curr_layer.raw)); // TODO remove duplicates that already exist in raw
+
+    all.raw = all.raw.concat(_.cloneDeep(curr_layer.raw)); // TODO remove duplicates? there dont seem to be any
     all.wallets = all.wallets.concat(_.cloneDeep(curr_layer.new_wallets));
     console.log("length of all.raw",all.raw.length);
 
