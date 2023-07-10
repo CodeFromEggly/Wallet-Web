@@ -7,7 +7,6 @@ export const linkColour = function (val, links)  {
 
     // Find min and max value of links' objects
     // TODO I might want to do this before I call linkColour and pass [max, min] instead of links. Will have better idea when recursive upgrade in place
-    // TODO probably dont need to use BigInt anymore as it is wei not eth
     let calculateMinMax = function(links) {
         let max = links[0].value;
         let min = links[0].value;

@@ -100,7 +100,7 @@ const processData = (data) => {
       // D3 wants list indices as source and target. These are calculated in linksPostProcess()
       source: wallets.indexOf(val.from),
       target: wallets.indexOf(val.to),
-      value: (val.value / 10e18), // TODO Convert Wei to ETH here
+      value: (val.value / 10e17), // TODO Convert Wei to ETH here
       hash: val.hash
      };
      return link;

@@ -19,10 +19,10 @@ Visualising the results
 */
 
 // Display SVG in 3/4 of the window size
-const height = 1000; //window.innerHeight * 0.75;
-const width = 1000; //window.innerWidth * 0.75;
-const nodeRadius = 12;
-const linkWidth = 6;
+const height = window.innerHeight * 0.6;
+const width = window.innerWidth * 0.6;
+const nodeRadius = 5;
+const linkWidth = 3;
 
 /*
 Stylise the objects in the graph
@@ -36,8 +36,8 @@ import { nodeColour, nodeSize, nodeClick, nodeHover, nodeUnHover, nodeDblCLick }
 
 // force-directed graph layout
 const force = d3.forceSimulation(nodes) // nodes repel each other
-  .force("charge", d3.forceManyBody().strength(-220)) 
-  .force("link", d3.forceLink(links).distance(100))
+  .force("charge", d3.forceManyBody().strength(-80)) // Prev. -220
+  .force("link", d3.forceLink(links).distance(50))   // Prev. 100
   .force("center", d3.forceCenter(width / 2, height / 2));
 
 // Give the force layout a chance to move the nodes a bit
@@ -48,7 +48,7 @@ for (let i = 0; i < 300; ++i) force.tick();
 */
 const svg = d3.select("#root")
   .append("svg")
-  .attr("viewBox", `0 0 ${height} ${width}`);
+  .attr("viewBox", `0 0 ${width} ${height}`);
 
 const link =  svg.selectAll(".link")
   .data(links)
@@ -59,7 +59,7 @@ const link =  svg.selectAll(".link")
 const node = svg.selectAll(".node")
   .data(nodes)
   .join("circle")
-  .attr("stroke","#ffffff")
+  .attr("stroke","#000000")
   .style("fill", d => nodeColour(d, SOURCE))
   .attr("r", nodeRadius);
 
