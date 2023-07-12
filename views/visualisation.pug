@@ -5,10 +5,8 @@ html
 
     title= title
     script(src="https://d3js.org/d3.v7.min.js")
-
-  body
-    h1 Results:
     
+  body    
     // Display graph in 'root' div
     #root 
 
@@ -16,7 +14,10 @@ html
     script.
       var data = !{JSON.stringify(data).replace(/</g, "\\u003c")};
 
+    // Div to act as banner at the bottom which shows info on the clicked node  TODO / link
+    #info
 
+    
     script(type='module', src='../visualisation/visualisation.js')
 
 

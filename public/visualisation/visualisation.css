@@ -1,9 +1,25 @@
-.node {
-    stroke: #fff;
-    stroke-width: 1.5px;
+#root {
+    background-color: black;
 }
 
-.link {
-    stroke: #f80a0a;
-    stroke-opacity: 0.6;
+.link-hover-text {
+    font-weight: bold;
+    font-size: 20px;
+
 }
+
+
+/* This aligns the  content of the info div on the /submit route */
+#info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#info p, #info a, #info button {
+    margin: 0 10px; /* Adjust as needed */
+}
+
+
+
+

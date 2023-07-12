@@ -6,14 +6,26 @@ html
     title= title
 
   body
-    h1 Test-Web!
+    h1 Wallet-Web!
     p Enter Etherscan API and source wallet below:
     form(action="/submit", method="post")
       label(for="etherscan-api") Etherscan API
-      input#etherscan-api(type="text" name="etherscanApi")
+      input#etherscan-api(type="text" name="etherscanApi" value="")
       label(for="source-wallet") Source Wallet
-      input#source-wallet(type="text" name="sourceWallet")
+      input#source-wallet(type="text" name="sourceWallet" value="")
+      label(for="depth") Search Depth
+      input#depth(type="number" name="depth" min = 1 value = 2)
       button(type="submit") Submit
+
+    // If GET has been called with a sourceWallet parameter, enter it
+    script.
+      document.addEventListener('DOMContentLoaded', (event) => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sourceWallet = urlParams.get('sourceWallet');
+        if (sourceWallet) {
+          document.getElementById('source-wallet').value = sourceWallet;
+        }
+      });
 
 
 

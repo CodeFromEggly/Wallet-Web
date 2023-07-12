@@ -1,9 +1,18 @@
-const bodyParser = require('body-parser');
-const fetch = require('node-fetch');
-const path = require('path');
+import path from 'path';
 
-const express = require('express');
+import express from 'express';
 const app = express();
+
+// ES6 way to get __dirname
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+
+// Functions used for making Etherscan requests
+import { layeredSearch } from './helpers.js';
 
 // Set the view engine to pug
 app.set('view engine', 'pug');
@@ -30,11 +39,23 @@ Routes
 
 // Route to handle form submission
 app.post('/submit', async (req, res) => {
-    const params = req.body;
-    const processedData = await getAndProcessData(params);
+  const params = req.body;
+  const SOURCE = params.sourceWallet;
+  console.log("original params",params);
+  params.sourceWallet = params.sourceWallet.toLowerCase();
+  //const processedData = await getAndProcessData(params);
 
-    res.render('visualisation', {title: 'Visualisation', data: processedData});
-  });
+  // GET search data, until depth is met
+  const allData = await layeredSearch(params);
+
+  // Process allData into nodes and links (and wallets, still, to see if it differs to the allData.wallets from layeredSearch)
+  let processedData = processData(allData.raw);
+
+  // Add sourceWallet for later:
+  processedData.sourceWallet = SOURCE; // TODO may not be necessary as allData.wallets[0] is source
+  
+  res.render('visualisation', {title: 'Visualisation', data: processedData});
+});
 
 
 app.listen(3000, () => {
@@ -43,73 +64,47 @@ app.listen(3000, () => {
 
 
 /* 
-Functions
+Functions // TODO tidy these up, move to other files
 */
 
 
-const getEtherscanData = async (params) => {
-  console.log("Loading http request via getEtherscanData");
-
-  var API_ADDRESS = "https://api.etherscan.io/api?module=account&action=txlist&address=" +
-  params.sourceWallet +
-  "&startblock=0&endblock=99999999&page=1&offset=10&sort=asc&apikey=" +
-  params.etherscanApi;
-  // TODO add other params, i.e., amount of transactions returned
-
-  try {
-      const response = await fetch(API_ADDRESS);
-      var data = await response.json();
-      //console.log("Response data", data);
-
-  } catch (error) {
-    console.error(error);
-    // TODO Handle errors as they be passed on to processData() as undefined
-  }
-
-  // Add the original wallet address to data for later
-  data.sourceWallet = params.sourceWallet;
-  return data;
-};
-
-
+// Process data into Nodes and Links
 const processData = (data) => {
-  // Process data into Nodes and Links
 
   // Accumulate list of addresses that transacted
-  var wallets = data.result.reduce(function (acc, val) {
-      if (acc.indexOf(val.to) === -1) {
-        acc.push(val.to);
-      }
-      if (acc.indexOf(val.from) === -1) {
-        acc.push(val.from);
-      }
-      return acc;
-      }, []);
-  
+  var wallets = data.reduce((acc, val) => {
+    if (!acc.includes(val.to)){
+      acc.push(val.to);
+    }
+    if (!acc.includes(val.from)) {
+      acc.push(val.from);
+    }
+    return acc;
+    }, []);
   
   // Generate nodes for the graph from each wallet
-  // TODO arrow notation using 'for each'
-
   var nodes = [];
   wallets.forEach(wallet => {
-      var nodeObject = {
-        id: wallet
-      }
-      nodes.push(nodeObject);
+    var nodeObject = {
+      id: wallet,
+    };
+    // To find the original data object where this wallet is a source:
+    //let originalObject = data.find((item) => item.from === wallet);
+    
+    nodes.push(nodeObject);
   });
 
   // create links for d3 which required numerical IDs not names
-  var links = data.result.map(val => {
+  var links = data.map((val) => {
     let link = {
+      // D3 wants list indices as source and target. These are calculated in linksPostProcess()
       source: wallets.indexOf(val.from),
       target: wallets.indexOf(val.to),
-      value: val.value
+      value: (val.value / 10e17), // TODO Convert Wei to ETH here
+      hash: val.hash
      };
      return link;
   });
-  
-  console.log('nodes,',nodes);
-  console.log('links,',links);
   
   // Send results for using in D3.js:     
   let postProcess = {wallets, nodes, links};
@@ -121,3 +116,13 @@ const getAndProcessData = async (params) => {
   const data = await getEtherscanData(params);
   return processData(data);
 };
+
+
+function duplicateCheck(all, new_data) {
+    ['wallets', 'nodes', 'links'].forEach(key => {
+        new_data[key] = new_data[key].filter((item) => { // Filters items based upon the truthy-ness of the return statement
+            return !_.find(all[key], (existingItem) => _.isEqual(existingItem, item));
+        });
+    });
+}
+
