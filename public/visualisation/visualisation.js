@@ -36,7 +36,7 @@ import { nodeColour, nodeSize, nodeClick, nodeHover, nodeUnHover, nodeDblCLick }
 
 // force-directed graph layout
 const force = d3.forceSimulation(nodes) // nodes repel each other
-  .force("charge", d3.forceManyBody().strength(-80)) // Prev. -220
+  .force("charge", d3.forceManyBody().strength(-80)) // Prev. -220 // TODO maybe strength could be related to each wallet's asset value OR SIZE could be
   .force("link", d3.forceLink(links).distance(50))   // Prev. 100
   .force("center", d3.forceCenter(width / 2, height / 2));
 
@@ -50,13 +50,22 @@ const svg = d3.select("#root")
   .append("svg")
   .attr("viewBox", `0 0 ${width} ${height}`);
 
-const link =  svg.selectAll(".link")
+// g allows zooming of graph centred on the mouse
+const g = svg.append("g");
+svg.call(d3.zoom()
+    .scaleExtent([0.2, 2])
+    .on("zoom", function (event) {
+    g.attr("transform", event.transform);
+    })
+  );
+
+const link =  g.selectAll(".link")
   .data(links)
   .join("line")
   .attr("stroke", d => linkColour(d.value, links))
   .attr("stroke-width", linkWidth);
 
-const node = svg.selectAll(".node")
+const node = g.selectAll(".node")
   .data(nodes)
   .join("circle")
   .attr("stroke","#000000")
@@ -75,15 +84,10 @@ node.on("mouseover",(event, d) => nodeHover(svg, event, d))
   .on("dblclick", nodeDblCLick);
 
 // LINKS: 
-
-
 link.on("mouseover", (event, d) => linkHover(svg, event, d)) // svg isn't yet defined so can't be called immediately
   .on("mouseout", linkUnHover)
   .on("click", (event, d) => linkClick(svg, event, d))
   .on("dblclick", linkDblClick);
-
-
-
 
 
 /*
