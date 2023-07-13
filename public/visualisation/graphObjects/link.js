@@ -60,12 +60,10 @@ export const linkHide = (event, d) => {
 
 // Display text
 export const linkClick = (svg, event, d) => {
-    console.log("click!");
   // Check if the link was clicked previously
   if (!clickedLinks[d.index]) {
     // If not, set the flag to true
     clickedLinks[d.index] = true;
-    console.log("click,",clickedLinks[d.index]);
   } else {
     // If yes, first hide the text immediately and then set the flag to false
     linkHide(event, d);
@@ -74,7 +72,8 @@ export const linkClick = (svg, event, d) => {
 }
 
 // Display text (triggers linkUnHover)
-export const linkHover = (svg, event, d) => {
+export const linkHover = (g, event, d, currentZoomScale) => {
+  console.log("received Zoom",currentZoomScale);
   // Only show the text if the link is not clicked
   if (!clickedLinks[d.index]) {
     // Calculate the coordinates for the text
@@ -82,17 +81,17 @@ export const linkHover = (svg, event, d) => {
     const y = (d.source.y + d.target.y) / 2;
 
     // Append the text to the SVG and store the reference
-    const textElement = svg.append("text")
+    const textElement = g.append("text")
       .attr("x", x)
       .attr("y", y)
       .attr("class", "link-hover-text")
       .text(`${d.value} ETH`)
-      .style("font-size", "20px")
+      .style("font-size", (currentZoomScale < 1 ? 20 * currentZoomScale : 20 / currentZoomScale) + "px") // Couldn't tell you why I chose this but it looks how I want it to
       .style("fill", "white");
 
     // Store the reference to the text element
     linkTextElements[d.index] = textElement;
-    console.log("Added text element for link", d.index, "element", textElement);
+    console.log("zoom creating a font size of", 20 / currentZoomScale);
 
   }
 }

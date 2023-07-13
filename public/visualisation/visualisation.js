@@ -51,13 +51,18 @@ const svg = d3.select("#root")
   .attr("viewBox", `0 0 ${width} ${height}`);
 
 // g allows zooming of graph centred on the mouse
+var currentZoomScale = 1;
 const g = svg.append("g");
 svg.call(d3.zoom()
     .scaleExtent([0.2, 2])
     .on("zoom", function (event) {
     g.attr("transform", event.transform);
-    })
-  );
+    currentZoomScale = event.transform.k;  // store the current zoom scale
+    console.log("zoom set to", currentZoomScale)
+
+  })
+);
+
 
 const link =  g.selectAll(".link")
   .data(links)
@@ -84,7 +89,7 @@ node.on("mouseover",(event, d) => nodeHover(svg, event, d))
   .on("dblclick", nodeDblCLick);
 
 // LINKS: 
-link.on("mouseover", (event, d) => linkHover(svg, event, d)) // svg isn't yet defined so can't be called immediately
+link.on("mouseover", (event, d) => linkHover(g, event, d, currentZoomScale)) // svg isn't yet defined so can't be called immediately
   .on("mouseout", linkUnHover)
   .on("click", (event, d) => linkClick(svg, event, d))
   .on("dblclick", linkDblClick);

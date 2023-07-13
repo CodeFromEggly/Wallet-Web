@@ -1,6 +1,6 @@
 {
   "name": "wallet-web",
-  "version": "2.0.1",
+  "version": "2.0.3",
   "description": "Enter an Ethereum wallet to see its transactions. Add a depth query to see how deep the mystery goes.",
   "main": "index.js",
   "scripts": {
