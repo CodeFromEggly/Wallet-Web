@@ -63,14 +63,16 @@ svg.call(d3.zoom()
   })
 );
 
+let node, link;
 
-const link =  g.selectAll(".link")
+
+link =  g.selectAll(".link")
   .data(links)
   .join("line")
   .attr("stroke", d => linkColour(d.value, links))
   .attr("stroke-width", linkWidth);
 
-const node = g.selectAll(".node")
+node = g.selectAll(".node")
   .data(nodes)
   .join("circle")
   .attr("stroke","#000000")

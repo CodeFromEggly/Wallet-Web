@@ -55,6 +55,42 @@ export const nodeClick = (event, d) => {
     };
     infoDiv.appendChild(sourceButton);
 
+    // Create and append "Get new data" button
+    const newDataButton = document.createElement('button');
+    newDataButton.textContent = 'Get new data';
+    newDataButton.onclick = async function() {
+        // Construct the request body
+        const body = {
+            address: d.id,
+        };
+
+        // Make a POST request to the /newData route with the selected node's id
+        try {
+            const response = await fetch('/newData', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            // Parse the response as JSON
+            var newData = await response.json();
+            console.log("got back from newData:",newData);
+
+            // Update your D3 force simulation with the new data
+            // TODO: Implement the D3 update logic
+
+        } catch (error) {
+            console.error('Failed to fetch new data:', error);
+        }
+    };
+    infoDiv.appendChild(newDataButton);
+
     // Scroll the #info div into view
     infoDiv.scrollIntoView({ behavior: 'smooth' });
 }

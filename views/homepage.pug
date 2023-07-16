@@ -1,31 +1,45 @@
 html
   head
     link(rel='stylesheet', href='/visualisation/visualisation.css')
-
-
     title= title
 
   body
     h1 Wallet-Web!
     p Enter Etherscan API and source wallet below:
     form(action="/submit", method="post")
-      label(for="etherscan-api") Etherscan API
-      input#etherscan-api(type="text" name="etherscanApi" value="")
-      label(for="source-wallet") Source Wallet
-      input#source-wallet(type="text" name="sourceWallet" value="")
-      label(for="depth") Search Depth
-      input#depth(type="number" name="depth" min = 1 value = 2)
+      div
+        label(for="etherscan-api") Etherscan API  |  
+        input#etherscan-api(type="text" name="etherscanApi" value="ANDMBHZWGBCBD1E1W67CMEIH53D8HZMUYK")
+
+      div
+        label(for="source-wallet") Source Wallet  |  
+        input#source-wallet(type="text" name="sourceWallet" value="0xDa06d7bF334bc5cCec9CB76de194565937378140")
+
+      div
+        label(for="depth") Search Depth
+        input#depth(type="number" name="depth" min = 1 value = 1)
+
+      div
+        label(for="store-api") Store API key in cookies
+        input#store-api(type="checkbox" name="checkbox")
+
+        div#cookie-info(style="display: none")
+          p * The key will be stored as a session cookie and will be automatically deleted when you close this page
+
       button(type="submit") Submit
 
-    // If GET has been called with a sourceWallet parameter, enter it
     script.
       document.addEventListener('DOMContentLoaded', (event) => {
         const urlParams = new URLSearchParams(window.location.search);
         const sourceWallet = urlParams.get('sourceWallet');
+        const storeApiCheckbox = document.getElementById('store-api');
+        const apiStoreTimeDropdown = document.getElementById('cookie-info');
+
         if (sourceWallet) {
           document.getElementById('source-wallet').value = sourceWallet;
         }
+
+        storeApiCheckbox.addEventListener('change', (event) => {
+          apiStoreTimeDropdown.style.display = storeApiCheckbox.checked ? 'block' : 'none';
+        });
       });
-
-
-

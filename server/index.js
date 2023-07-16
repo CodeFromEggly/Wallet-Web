@@ -1,7 +1,11 @@
 import path from 'path';
 
 import express from 'express';
+import cookieParser from 'cookie-parser';
+
 const app = express();
+app.use(cookieParser());
+
 
 // ES6 way to get __dirname
 import { fileURLToPath } from 'url';
@@ -12,7 +16,7 @@ const __dirname = dirname(__filename);
 
 
 // Functions used for making Etherscan requests
-import { layeredSearch } from './helpers.js';
+import { layeredSearch, processData, getAndProcessData} from './helpers.js';
 
 // Set the view engine to pug
 app.set('view engine', 'pug');
@@ -40,13 +44,23 @@ Routes
 // Route to handle form submission
 app.post('/submit', async (req, res) => {
   const params = req.body;
+  console.log(params);
+
+  // TODO store api key as cookie
+  let checked = params.checkbox;
+  console.log("checked,",checked);
+  if (checked) {
+    // TODO store api key in cookies
+    console.log("Let's store the cookie!", params.etherscanApi);
+    res.cookie('etherscanApi', params.etherscanApi);
+  }
+
   const SOURCE = params.sourceWallet;
-  console.log("original params",params);
   params.sourceWallet = params.sourceWallet.toLowerCase();
   //const processedData = await getAndProcessData(params);
 
   // GET search data, until depth is met
-  const allData = await layeredSearch(params);
+  const allData = await layeredSearch(params); // TODO send the specific paramters that we want, maybe (i.e. not checkbox)
 
   // Process allData into nodes and links (and wallets, still, to see if it differs to the allData.wallets from layeredSearch)
   let processedData = processData(allData.raw);
@@ -55,6 +69,25 @@ app.post('/submit', async (req, res) => {
   processedData.sourceWallet = SOURCE; // TODO may not be necessary as allData.wallets[0] is source
   
   res.render('visualisation', {title: 'Visualisation', data: processedData});
+});
+
+/* Recives POST requests from the visualisation for new data */
+app.post('/newData', async (req, res) => {
+  console.log("new data requested");
+  // TODO Receive source wallet
+  let sourceWallet = req.body.address;
+  console.log("received address", sourceWallet);
+  // TODO API key is stored in cookies 
+  let cooKEY = req.cookies.etherscanApi;
+  console.log("retrieved cooKEY",cooKEY);
+  // TODO GET data from etherscan
+  let params = {sourceWallet: sourceWallet, etherscanApi: cooKEY};
+
+  // TODO process data
+  let processedData = await getAndProcessData(params);
+
+  // TODO send new data as response
+  res.json(processedData);
 });
 
 
@@ -68,54 +101,7 @@ Functions // TODO tidy these up, move to other files
 */
 
 
-// Process data into Nodes and Links
-const processData = (data) => {
 
-  // Accumulate list of addresses that transacted
-  var wallets = data.reduce((acc, val) => {
-    if (!acc.includes(val.to)){
-      acc.push(val.to);
-    }
-    if (!acc.includes(val.from)) {
-      acc.push(val.from);
-    }
-    return acc;
-    }, []);
-  
-  // Generate nodes for the graph from each wallet
-  var nodes = [];
-  wallets.forEach(wallet => {
-    var nodeObject = {
-      id: wallet,
-    };
-    // To find the original data object where this wallet is a source:
-    //let originalObject = data.find((item) => item.from === wallet);
-    
-    nodes.push(nodeObject);
-  });
-
-  // create links for d3 which required numerical IDs not names
-  var links = data.map((val) => {
-    let link = {
-      // D3 wants list indices as source and target. These are calculated in linksPostProcess()
-      source: wallets.indexOf(val.from),
-      target: wallets.indexOf(val.to),
-      value: (val.value / 10e17), // TODO Convert Wei to ETH here
-      hash: val.hash
-     };
-     return link;
-  });
-  
-  // Send results for using in D3.js:     
-  let postProcess = {wallets, nodes, links};
-  return postProcess;
-};
-
-
-const getAndProcessData = async (params) => {
-  const data = await getEtherscanData(params);
-  return processData(data);
-};
 
 
 function duplicateCheck(all, new_data) {
