@@ -7,9 +7,13 @@ html
     h1 Wallet-Web!
     p Enter Etherscan API and source wallet below:
     form(action="/submit", method="post")
+      // Auto-populates API value if cookie is present
       div
         label(for="etherscan-api") Etherscan API  |  
-        input#etherscan-api(type="text" name="etherscanApi" value="ANDMBHZWGBCBD1E1W67CMEIH53D8HZMUYK")
+        if etherscanApi
+            input#etherscan-api(type="text" name="etherscanApi" value=etherscanApi)
+        else
+            input#etherscan-api(type="text" name="etherscanApi" value="")
 
       div
         label(for="source-wallet") Source Wallet  |  
@@ -22,12 +26,15 @@ html
       div
         label(for="store-api") Store API key in cookies
         input#store-api(type="checkbox" name="checkbox")
+        #cookie-info(style="display: none")
+          p * The key will be stored for <strong> 2 hours </strong> only
 
-        div#cookie-info(style="display: none")
-          p * The key will be stored as a session cookie and will be automatically deleted when you close this page
+      div
+        p Cookies will be used when choosing a new source wallet or generating new node data
 
       button(type="submit") Submit
 
+    // If homepage has been requested from another link, check URL parameters
     script.
       document.addEventListener('DOMContentLoaded', (event) => {
         const urlParams = new URLSearchParams(window.location.search);

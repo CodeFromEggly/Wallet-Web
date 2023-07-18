@@ -33,7 +33,12 @@ app.use(express.json());
 
 // Define a route to render the homepage
 app.get('/', (req, res) => {
-    res.render('homepage', { title: 'Homepage' });
+  // Check for API key in cookies:
+  let etherscanApi = req.cookies.etherscanApi;
+  console.log("hompage cookie:", etherscanApi);
+
+
+  res.render('homepage', { title: 'Homepage', etherscanApi: etherscanApi });
 });
 
 
@@ -46,17 +51,16 @@ app.post('/submit', async (req, res) => {
   const params = req.body;
   console.log(params);
 
-  // TODO store api key as cookie
+  // Store api key as cookie
   let checked = params.checkbox;
   console.log("checked,",checked);
   if (checked) {
-    // TODO store api key in cookies
-    console.log("Let's store the cookie!", params.etherscanApi);
-    res.cookie('etherscanApi', params.etherscanApi);
+    res.cookie('etherscanApi', params.etherscanApi, {maxAge: (1000 * 60 * 2)}); // Stored for 2 hours
   }
 
+  // Save the source wallet for later
   const SOURCE = params.sourceWallet;
-  params.sourceWallet = params.sourceWallet.toLowerCase();
+  params.sourceWallet = SOURCE.toLowerCase();
   //const processedData = await getAndProcessData(params);
 
   // GET search data, until depth is met
@@ -74,16 +78,14 @@ app.post('/submit', async (req, res) => {
 /* Recives POST requests from the visualisation for new data */
 app.post('/newData', async (req, res) => {
   console.log("new data requested");
-  // TODO Receive source wallet
+  // Receive source wallet
   let sourceWallet = req.body.address;
   console.log("received address", sourceWallet);
-  // TODO API key is stored in cookies 
+  // API key is stored in cookies 
   let cooKEY = req.cookies.etherscanApi;
   console.log("retrieved cooKEY",cooKEY);
-  // TODO GET data from etherscan
+  // GET data from etherscan
   let params = {sourceWallet: sourceWallet, etherscanApi: cooKEY};
-
-  // TODO process data
   let processedData = await getAndProcessData(params);
 
   // TODO send new data as response
